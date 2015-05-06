@@ -2,6 +2,7 @@
 # coding: utf
 
 import readline
+from os.path import isfile
 import sys
 import tpg
 import itertools
@@ -77,16 +78,30 @@ calc = Calc()
 Vars={}
 PS1='--> '
 
+def caalc(line):
+    try:
+        res = calc(line)
+    except tpg.Error as exc:
+        print >> sys.stderr, exc
+        res = None
+    if res != None:
+        print res
+
 Stop=False
 while not Stop:
     line = raw_input(PS1)
     if line == 'exit':
         Stop=True
+        continue
+    if isfile(line):
+        # apply scenario
+        with open(line, 'r') as input:
+            lines = input.readlines()
+        for line in lines:
+            line = line[:-1]
+            if line == 'exit':
+                Stop=True
+                break
+            caalc(line)
     else:
-        try:
-            res = calc(line)
-        except tpg.Error as exc:
-            print >> sys.stderr, exc
-            res = None
-        if res != None:
-            print res
+        caalc(line)
