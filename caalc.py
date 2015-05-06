@@ -47,6 +47,37 @@ class Vector(list):
         except TypeError:
             return self.__class__(c or a for c in self)
 
+class FlatMatrix(Vector):
+    def __init__(self, *argp, **argn):
+        Vector.__init__(self, *argp, **argn)
+
+    def __str__(self):
+        #TODO display rows
+        return "\n".join(Vector.__str__(c) for c in self)
+
+    def __op(self, a, op):
+        try:
+            return self.__class__(op(s,e) for s,e in zip(self, a))
+        except TypeError:
+            return self.__class__(op(c,a) for c in self)
+
+    def __add__(self, a): return self.__op(a, lambda c,d: c+d)
+    def __sub__(self, a): return self.__op(a, lambda c,d: c-d)
+    def __div__(self, a): return self.__op(a, lambda c,d: c/d)
+    def __mul__(self, a): return self.__op(a, lambda c,d: c*d)
+
+    def __and__(self, a):
+        try:
+            return reduce(lambda s, (c,d): s+c*d, zip(self, a), 0)
+        except TypeError:
+            return self.__class__(c and a for c in self)
+
+    def __or__(self, a):
+        try:
+            return self.__class__(itertools.chain(self, a))
+        except TypeError:
+            return self.__class__(c or a for c in self)
+
 class Calc(tpg.Parser):
     r"""
 
@@ -64,11 +95,14 @@ class Calc(tpg.Parser):
     Assign -> id/i '=' Expr/e $Vars[i]=e$ ;
     Expr/t -> Fact/t ( op1/op Fact/f $t=op(t,f)$ )* ;
     Fact/f -> Atom/f ( op2/op Atom/a $f=op(f,a)$ )* ;
-    Atom/a ->   Vector/a
+    Atom/a -> Matrix/a
+              |  Vector/a
               | id/i ( check $i in Vars$ | error $"Undefined variable '{}'".format(i)$ ) $a=Vars[i]$
               | fnumber/a
               | number/a
               | '\(' Expr/a '\)' ;
+    Matrix/$FlatMatrix(a)$ -> '\[' '\]' $a=[]$ | '\[' Vectors/a '\]' ;
+    Vectors/v -> Vector/a Vectors/t $v=[a]+t$ | Vector/a $v=[a]$;
     Vector/$Vector(a)$ -> '\[' '\]' $a=[]$ | '\[' Atoms/a '\]' ;
     Atoms/v -> Atom/a Atoms/t $v=[a]+t$ | Atom/a $v=[a]$ ;
 
