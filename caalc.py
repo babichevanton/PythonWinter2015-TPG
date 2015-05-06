@@ -80,10 +80,13 @@ PS1='--> '
 Stop=False
 while not Stop:
     line = raw_input(PS1)
-    try:
-        res = calc(line)
-    except tpg.Error as exc:
-        print >> sys.stderr, exc
-        res = None
-    if res != None:
-        print res
+    if line == 'exit':
+        Stop=True
+    else:
+        try:
+            res = calc(line)
+        except tpg.Error as exc:
+            print >> sys.stderr, exc
+            res = None
+        if res != None:
+            print res
