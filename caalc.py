@@ -100,7 +100,6 @@ while not Stop:
         for line in lines:
             line = line[:-1]
             if line == 'exit':
-                Stop=True
                 break
             caalc(line)
     else:
