@@ -21,8 +21,10 @@ class Vector(list):
     def __init__(self, *argp, **argn):
         list.__init__(self, *argp, **argn)
 
-    def __str__(self):
-        return "[" + " ".join(str(c) for c in self) + "]"
+    def __str__(self, num=None):
+        if not num:
+            num = len(self)
+        return "[" + " ".join(str(c) for c in self[:num]) + "]"
 
     def __op(self, a, op):
         try:
@@ -53,7 +55,11 @@ class FlatMatrix(Vector):
 
     def __str__(self):
         #TODO display rows
-        return "\n".join(Vector.__str__(c) for c in self)
+        min_row_len = sys.maxint
+        for c in self:
+            if len(c) < min_row_len:
+                min_row_len = len(c)
+        return "\n".join(Vector.__str__(c, num=min_row_len) for c in self)
 
     def __op(self, a, op):
         try:
